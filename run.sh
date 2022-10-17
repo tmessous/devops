@@ -53,6 +53,7 @@ fcurl "kubectl" "https://dl.k8s.io/release/${KUBECTL}/bin/linux/amd64/kubectl"
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && flog "$?" "install source list docker"
 
+apt-get update
 fapt "${apt_docker[@]}" 
 
 if [[ -f "/etc/systemd/system/docker-compose@.service" ]]
