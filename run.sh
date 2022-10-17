@@ -9,7 +9,7 @@ flog() {
 }
 
 fapt() {
-    for apt_name in $i
+    for apt_name in $@
     do
         apt-get -yq install $apt_name
         flog "$?" "install $apt_name"
@@ -17,13 +17,23 @@ fapt() {
 }
 
 fcurl() {
-    [[ -f "/usr/local/bin/$1" ]] && flog "$?" "$1 already exist" ||  curl -L $2 -o /usr/local/bin/$1 && flog "$?" "install $1";chmod +x /usr/local/bin/$1
+    if [[ -f "/usr/local/bin/$1" ]]
+    then
+        flog "$?" "$1 already exist"
+    else
+        curl -L $2 -o /usr/local/bin/$1 && flog "$?" "install $1";chmod +x /usr/local/bin/$1
+    fi
 }
 
 fsystemctl() {
     if [[ "$1" == "enable" ]] 
     then
-       [[ -f "/etc/systemd/system/multi-user.target.wants/$2" ]] && flog "$?" "$2 already exist $1" || systemctl $1 $2 &&  flog "$?" "$1 $2" 
+        if [[ -f "/etc/systemd/system/multi-user.target.wants/$2" ]]
+        then
+            flog "$?" "$2 already exist $1"
+        else 
+            systemctl $1 $2 &&  flog "$?" "$1 $2"
+        fi
     else
          systemctl $1 $2 &&  flog "$?" "$1 $2"  
     fi 
@@ -45,7 +55,11 @@ fcurl "kubectl" "https://dl.k8s.io/release/${KUBECTL}/bin/linux/amd64/kubectl"
 
 fapt "${apt_docker[@]}" 
 
-[[ -f "/etc/systemd/system/docker-compose@.service" ]] &&  flog "$?" "Template docker-compose already exist" || cat > /etc/systemd/system/docker-compose@.service <<-EOF
+if [[ -f "/etc/systemd/system/docker-compose@.service" ]]
+then 
+    flog "$?" "Template docker-compose already exist"
+else
+cat > /etc/systemd/system/docker-compose@.service <<-EOF
 [Unit]
 Description=%i service with docker compose
 PartOf=docker.service
@@ -62,8 +76,13 @@ ExecStop=/usr/local/bin/docker-compose down
 WantedBy=multi-user.target
 EOF
 flog "$?" "install Template docker-compose"
+fi
 
-[[ -f "/etc/systemd/system/minikube.service" ]] &&  flog "$?" "Template minikube already exist" ||  cat > /etc/systemd/system/minikube.service <<-EOF
+if [[ -f "/etc/systemd/system/minikube.service" ]]
+then
+    flog "$?" "Template minikube already exist"
+else
+cat > /etc/systemd/system/minikube.service <<-EOF
 [Unit]
 Description=Minikube Cluster
 After=docker.service
@@ -78,8 +97,14 @@ ExecStop=/usr/local/bin/minikube stop
 WantedBy=multi-user.target
 EOF
 flog "$?" "install Template minikube"
+fi
 
-[[ -f "/etc/docker/compose/jenkins/docker-compose.yml" ]] &&  flog "$?" "Template docker-compose already exist" || cat > /etc/docker/compose/jenkins/docker-compose.yml <<-EOF
+
+if [[ -f "/etc/docker/compose/jenkins/docker-compose.yml" ]]
+then
+flog "$?" "Template Jenkins docker-compose already exist"
+else
+cat > /etc/docker/compose/jenkins/docker-compose.yml <<-EOF
 version: '3.8'
 services:
     jenkins:
@@ -96,7 +121,7 @@ services:
         - /usr/local/bin/docker:/usr/local/bin/docker
 EOF
 flog "$?" "install Template Jenkins docker-compose"
-
+fi
 
 fsystemctl "enable" "minikube.service"
 fsystemctl "enable" "docker-compose@jenkins"
