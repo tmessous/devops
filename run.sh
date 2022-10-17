@@ -91,9 +91,12 @@ After=docker.service
 
 [Service]
 Type=oneshot
+WorkingDirectory=/root
 ExecStart=/usr/local/bin/minikube start --driver=none
 RemainAfterExit=true
 ExecStop=/usr/local/bin/minikube stop
+User=root
+Group=root
 
 [Install]
 WantedBy=multi-user.target
