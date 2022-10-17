@@ -39,7 +39,7 @@ fcurl "kubectl" "https://dl.k8s.io/release/${KUBECTL}/bin/linux/amd64/kubectl"
 
 [[ -f "/etc/apt/keyrings/docker.gpg" ]] && flog "$?" "keyrings gpg docker already exist" || curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg && flog "$?" "install keyrings gpg docker"
 
-[[ -f "/etc/apt/keyrings/docker.gpg" ]] && flog "$?" "source list docker already exist" || echo \
+[[ -f "/etc/apt/keyrings/docker.gpg" ]] && echo \
   "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && flog "$?" "install source list docker"
 
@@ -60,7 +60,8 @@ ExecStop=/usr/local/bin/docker-compose down
 
 [Install]
 WantedBy=multi-user.target
-EOF && flog "$?" "install Template docker-compose"
+EOF
+flog "$?" "install Template docker-compose"
 
 [[ -f "/etc/systemd/system/minikube.service" ]] &&  flog "$?" "Template minikube already exist" ||  cat > /etc/systemd/system/minikube.service <<-EOF
 [Unit]
@@ -75,7 +76,8 @@ ExecStop=/usr/local/bin/minikube stop
 
 [Install]
 WantedBy=multi-user.target
-EOF && flog "$?" "install Template minikube"
+EOF
+flog "$?" "install Template minikube"
 
 [[ -f "/etc/docker/compose/jenkins/docker-compose.yml" ]] &&  flog "$?" "Template docker-compose already exist" || cat > /etc/docker/compose/jenkins/docker-compose.yml <<-EOF
 version: '3.8'
@@ -92,7 +94,8 @@ services:
         - /home/debian/jenkins:/var/jenkins_home
         - /var/run/docker.sock:/var/run/docker.sock
         - /usr/local/bin/docker:/usr/local/bin/docker
-EOF && flog "$?" "install Template Jenkins docker-compose"
+EOF
+flog "$?" "install Template Jenkins docker-compose"
 
 
 fsystemctl "enable" "minikube.service"
@@ -100,4 +103,4 @@ fsystemctl "enable" "docker-compose@jenkins"
 
 fsystemctl "start" "docker-compose@jenkins"
 /usr/local/bin/minikube start --driver=none && flog "$?" "start minikube"
-flog "$?" "start setup"
+flog "$?" "End setup"
