@@ -75,6 +75,7 @@ ExecStop=/usr/local/bin/docker-compose down
 [Install]
 WantedBy=multi-user.target
 EOF
+chmod 644 /etc/systemd/system/docker-compose@.service
 flog "$?" "install Template docker-compose"
 fi
 
@@ -96,6 +97,7 @@ ExecStop=/usr/local/bin/minikube stop
 [Install]
 WantedBy=multi-user.target
 EOF
+chmod 644 /etc/systemd/system/minikube.service
 flog "$?" "install Template minikube"
 fi
 
@@ -109,18 +111,19 @@ cat > /etc/docker/compose/jenkins/docker-compose.yml <<-EOF
 version: '3.8'
 services:
     jenkins:
-    image: jenkins/jenkins:lts
-    privileged: true
-    user: root
-    ports:
-        - 80:8080
-        - 50000:50000
-    container_name: jenkins
-    volumes:
-        - ${HOME}/jenkins:/var/jenkins_home
-        - /var/run/docker.sock:/var/run/docker.sock
-        - /usr/local/bin/docker:/usr/local/bin/docker
+        image: jenkins/jenkins:lts
+        privileged: true
+        user: root
+        ports:
+            - 80:8080
+            - 50000:50000
+        container_name: jenkins
+        volumes:
+            - ${HOME}/jenkins:/var/jenkins_home
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /usr/local/bin/docker:/usr/local/bin/docker
 EOF
+chmod 644 /etc/docker/compose/jenkins/docker-compose.yml
 flog "$?" "install Template Jenkins docker-compose"
 fi
 
