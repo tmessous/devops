@@ -104,7 +104,7 @@ if [[ -f "/etc/docker/compose/jenkins/docker-compose.yml" ]]
 then
 flog "$?" "Template Jenkins docker-compose already exist"
 else
-mkdir -p /etc/docker/compose/jenkins/
+mkdir -p /etc/docker/compose/jenkins/ ${HOME}/jenkins
 cat > /etc/docker/compose/jenkins/docker-compose.yml <<-EOF
 version: '3.8'
 services:
