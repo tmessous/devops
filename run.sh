@@ -131,5 +131,9 @@ fsystemctl "enable" "minikube.service"
 fsystemctl "enable" "docker-compose@jenkins"
 
 fsystemctl "start" "docker-compose@jenkins"
+
+if /usr/local/bin/minikube status | grep -ic "not found"
+then
 /usr/local/bin/minikube start --driver=none && flog "$?" "start minikube"
+fi
 flog "$?" "End setup"
